@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tughluk Digital — Web & Digital Services Toronto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #060810;
+    --bg2: #0d1120;
+    --bg3: #111827;
+    --accent: #00e5b0;
+    --accent2: #ff5f3d;
+    --accent-glow: rgba(0,229,176,0.18);
+    --text: #e8eef6;
+    --muted: #7a8fa8;
+    --border: rgba(0,229,176,0.12);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 38px; height: 38px;
+    border: 1.5px solid rgba(0,229,176,0.5);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease-out, width 0.3s, height 0.3s;
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* CANVAS BG */
+  #canvas-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+    opacity: 0.55;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.4s, padding 0.4s, backdrop-filter 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(6,8,16,0.92);
+    backdrop-filter: blur(16px);
+    padding: 14px 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .nav-links {
+    display: flex; align-items: center; gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta {
+    background: var(--accent);
+    color: #060810 !important;
+    font-family: var(--font-display);
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 10px 22px;
+    border-radius: 6px;
+    letter-spacing: 0.4px;
+    transition: box-shadow 0.3s, transform 0.2s !important;
+  }
+  .nav-cta:hover {
+    box-shadow: 0 0 24px rgba(0,229,176,0.45);
+    transform: translateY(-1px);
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 60px 80px;
+    position: relative; z-index: 1;
+  }
+  .hero-inner { max-width: 780px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,229,176,0.07);
+    border: 1px solid rgba(0,229,176,0.22);
+    color: var(--accent);
+    font-size: 12px; font-weight: 500;
+    padding: 6px 14px; border-radius: 30px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .badge-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(42px, 6vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -2px;
+    color: #fff;
+    margin-bottom: 24px;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+  h1 em::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    opacity: 0.4;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.75;
+    margin-bottom: 44px;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-btns {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 72px;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+  .btn-main {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent);
+    color: #060810;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 15px;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s, transform 0.2s;
+  }
+  .btn-main:hover {
+    box-shadow: 0 0 36px rgba(0,229,176,0.5);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 500; font-size: 15px;
+    padding: 15px 30px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.04);
+  }
+  .hero-stats {
+    display: flex; gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    animation: fadeUp 1s 0.4s ease both;
+    background: rgba(13,17,32,0.7);
+    backdrop-filter: blur(8px);
+    width: fit-content;
+  }
+  .stat {
+    padding: 20px 36px;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+    letter-spacing: 0.3px;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* SECTION */
+  section { padding: 100px 60px; position: relative; z-index: 1; }
+  .section-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: block;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    letter-spacing: -1.2px;
+    color: #fff;
+    line-height: 1.08;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 500px;
+    line-height: 1.75;
+    margin-bottom: 56px;
+  }
+
+  /* ABOUT */
+  .about-section { background: var(--bg2); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .about-left {}
+  .about-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #00a8ff);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 26px;
+    color: #060810;
+    margin-bottom: 28px;
+    box-shadow: 0 0 40px rgba(0,229,176,0.25);
+  }
+  .about-text {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.85;
+    margin-bottom: 24px;
+  }
+  .lang-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-top: 28px;
+  }
+  .lang-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px; color: #c0cedd;
+  }
+  .lang-dot { width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0; }
+  .about-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .about-feature {
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 24px 20px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .about-feature:hover {
+    border-color: var(--border);
+    transform: translateY(-4px);
+  }
+  .af-icon {
+    font-size: 26px; margin-bottom: 12px;
+    display: block;
+  }
+  .af-title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 14px; color: #fff;
+    margin-bottom: 6px;
+  }
+  .af-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* SERVICES */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .service-card {
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 18px;
+    padding: 34px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .service-card:hover::before { opacity: 1; }
+  .service-card:hover {
+    border-color: var(--border);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .service-icon {
+    width: 52px; height: 52px;
+    background: rgba(0,229,176,0.08);
+    border: 1px solid rgba(0,229,176,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 22px;
+  }
+  .service-card h3 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 18px; color: #fff;
+    margin-bottom: 10px; letter-spacing: -0.3px;
+  }
+  .service-card p { color: var(--muted); font-size: 14px; line-height: 1.75; }
+  .service-price {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 14px; color: var(--accent);
+    background: rgba(0,229,176,0.08);
+    padding: 5px 12px; border-radius: 5px;
+  }
+
+  /* PROCESS */
+  .process-section { background: var(--bg2); }
+  .process-steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1100px; margin: 0 auto;
+    position: relative;
+  }
+  .process-steps::before {
+    content: '';
+    position: absolute;
+    top: 34px; left: calc(16.67% + 16px); right: calc(16.67% + 16px);
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent 50%, var(--accent));
+    opacity: 0.3;
+  }
+  .step-card {
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 32px 26px;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .step-card:hover { border-color: var(--border); }
+  .step-num {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(0,229,176,0.08);
+    border: 2px solid var(--accent);
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 20px; color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 20px rgba(0,229,176,0.15);
+  }
+  .step-card h4 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 17px; color: #fff;
+    margin-bottom: 10px;
+  }
+  .step-card p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px; max-width: 780px; margin: 0 auto;
+  }
+  .pricing-card {
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 38px 32px;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .pricing-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+  .pricing-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(145deg, rgba(0,229,176,0.05), var(--bg2));
+    box-shadow: 0 0 40px rgba(0,229,176,0.1);
+  }
+  .pricing-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 10px; display: block;
+  }
+  .pricing-card.featured .pricing-label { color: var(--accent); }
+  .pricing-name {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 22px; color: #fff;
+    margin-bottom: 20px;
+  }
+  .pricing-amount {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 42px; color: #fff;
+    line-height: 1; margin-bottom: 6px;
+  }
+  .pricing-amount span { font-size: 20px; color: var(--muted); font-weight: 400; }
+  .pricing-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+  .pricing-features { list-style: none; margin-bottom: 32px; }
+  .pricing-features li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: #c0cedd;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .pricing-features li::before {
+    content: '✓';
+    color: var(--accent);
+    font-weight: 700; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .pricing-btn {
+    display: block; text-align: center;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .pricing-btn.outline {
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  .pricing-btn.outline:hover { background: rgba(255,255,255,0.05); }
+  .pricing-btn.solid {
+    background: var(--accent);
+    color: #060810;
+  }
+  .pricing-btn.solid:hover { box-shadow: 0 0 30px rgba(0,229,176,0.4); }
+
+  /* CONTACT */
+  .contact-section { background: var(--bg2); }
+  .contact-inner {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: start;
+  }
+  .contact-info h2 { margin-bottom: 16px; }
+  .contact-info p { color: var(--muted); font-size: 16px; line-height: 1.8; margin-bottom: 36px; }
+  .contact-items { display: flex; flex-direction: column; gap: 16px; }
+  .contact-item {
+    display: flex; align-items: center; gap: 14px;
+    color: var(--text); font-size: 14px;
+    text-decoration: none;
+  }
+  .contact-item:hover .ci-label { color: var(--accent); }
+  .ci-icon {
+    width: 42px; height: 42px;
+    background: rgba(0,229,176,0.07);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ci-sub { font-size: 11px; color: var(--muted); }
+  .ci-label { font-weight: 500; transition: color 0.2s; }
+  .contact-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: rgba(0,229,176,0.4);
+    box-shadow: 0 0 0 3px rgba(0,229,176,0.07);
+  }
+  .form-group textarea { height: 110px; }
+  .form-submit {
+    background: var(--accent);
+    color: #060810;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 15px;
+    padding: 14px 28px;
+    border: none; border-radius: 8px;
+    cursor: none;
+    transition: box-shadow 0.3s, transform 0.2s;
+    text-align: center;
+  }
+  .form-submit:hover {
+    box-shadow: 0 0 32px rgba(0,229,176,0.45);
+    transform: translateY(-2px);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 48px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+  .footer-left .logo { font-size: 20px; }
+  .footer-left p { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .footer-links { display: flex; gap: 28px; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-right { color: var(--muted); font-size: 13px; }
+
+  /* GLOW LINES */
+  .glow-line {
+    position: absolute; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.15;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav.scrolled { padding: 12px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    section { padding: 70px 24px; }
+    .about-grid,
+    .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+    .services-grid,
+    .process-steps { grid-template-columns: 1fr 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-direction: column; width: 100%; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+    .nav-links { display: none; }
+    h1 { font-size: 38px; letter-spacing: -1px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- Particle canvas -->
+<canvas id="canvas-bg"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo">Tughluk<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#process">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact" class="nav-cta">Get a Free Sample</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Serving Scarborough &amp; Toronto businesses
+    </div>
+    <h1>Your Business<br>Deserves to Look<br><em>Professional Online</em></h1>
+    <p class="hero-sub">Websites, digital menus, QR codes, WhatsApp ordering, and social media setup — fast, affordable, and mobile-first.</p>
+    <div class="hero-btns">
+      <a href="https://wa.me/16475339529?text=Hi%20Tughluk%2C%20I%20want%20a%20free%20sample%20for%20my%20business" class="btn-main" target="_blank">
+        💬 Get a Free Sample
+      </a>
+      <a href="#services" class="btn-ghost">See What I Do →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">50+</div>
+        <div class="stat-label">Businesses Helped</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">48hr</div>
+        <div class="stat-label">Average Turnaround</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Languages Supported</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-grid">
+    <div class="about-left reveal">
+      <span class="section-tag">About Me</span>
+      <h2>Local Digital Help<br>for Local Businesses</h2>
+      <p class="about-text">I'm Tughluk — a Scarborough-based digital service provider. I help restaurants, shops, and small businesses build a stronger online presence without expensive agency prices or complicated tech.</p>
+      <p class="about-text">My goal is simple: make your business look professional online so you can focus on what you do best.</p>
+      <a href="https://wa.me/16475339529" class="btn-main" target="_blank" style="width:fit-content">Contact Me on WhatsApp</a>
+      <div class="lang-grid" style="margin-top:28px">
+        <div class="lang-pill"><span class="lang-dot"></span>English</div>
+        <div class="lang-pill"><span class="lang-dot"></span>Turkish</div>
+        <div class="lang-pill"><span class="lang-dot"></span>Chinese</div>
+        <div class="lang-pill"><span class="lang-dot"></span>Uyghur</div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-feature reveal reveal-delay-1">
+        <span class="af-icon">⚡</span>
+        <div class="af-title">Fast Delivery</div>
+        <div class="af-desc">Most projects are live within 24–48 hours of receiving your content.</div>
+      </div>
+      <div class="about-feature reveal reveal-delay-2">
+        <span class="af-icon">📱</span>
+        <div class="af-title">Mobile-First</div>
+        <div class="af-desc">Every site looks perfect on phones, where your customers actually are.</div>
+      </div>
+      <div class="about-feature reveal reveal-delay-3">
+        <span class="af-icon">💰</span>
+        <div class="af-title">Affordable</div>
+        <div class="af-desc">No agency markup. Fair pricing built for local businesses on real budgets.</div>
+      </div>
+      <div class="about-feature reveal reveal-delay-4">
+        <span class="af-icon">🌍</span>
+        <div class="af-title">Multilingual</div>
+        <div class="af-desc">I speak your language — literally. Work comfortably in 4 languages.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" style="max-width:1220px;margin:0 auto;padding:100px 60px">
+  <div class="reveal" style="text-align:center;margin-bottom:60px">
+    <span class="section-tag">What I Offer</span>
+    <h2>Services for Local Businesses</h2>
+    <p class="section-sub" style="margin:0 auto">Everything you need to look professional and get found online.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-icon">🌐</div>
+      <h3>Website Design</h3>
+      <p>Clean, mobile-friendly websites for restaurants, shops, and local service businesses. No templates — built for you.</p>
+      <span class="service-price">From $349</span>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-icon">📋</div>
+      <h3>Digital Menu & QR Code</h3>
+      <p>Beautiful online menus your customers can open instantly by scanning a QR code. Perfect for restaurants and cafés.</p>
+      <span class="service-price">From $99</span>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-icon">💬</div>
+      <h3>WhatsApp & Social Setup</h3>
+      <p>WhatsApp Business, Instagram, Facebook pages, and basic online contact setup — all configured and ready to go.</p>
+      <span class="service-price">From $79</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process-section" id="process">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="reveal" style="text-align:center;margin-bottom:60px">
+      <span class="section-tag">How It Works</span>
+      <h2>3 Steps to Go Online</h2>
+      <p class="section-sub" style="margin:0 auto">A simple, no-stress process to get your business online fast.</p>
+    </div>
+    <div class="process-steps">
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">01</div>
+        <h4>Send Your Info</h4>
+        <p>Share your menu, photos, logo, or business details via WhatsApp or email. No tech knowledge needed.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <h4>I Build a Sample</h4>
+        <p>I prepare a clean preview so you can see exactly how your business will look online before committing.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-3">
+        <div class="step-num">03</div>
+        <h4>You Go Live</h4>
+        <p>Once you approve, your site or digital menu is published and ready to share with customers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="max-width:900px;margin:0 auto;padding:100px 60px">
+  <div class="reveal" style="text-align:center;margin-bottom:60px">
+    <span class="section-tag">Pricing</span>
+    <h2>Simple, Honest Pricing</h2>
+    <p class="section-sub" style="margin:0 auto">No hidden fees. No confusing packages. Just what your business needs.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal reveal-delay-1">
+      <span class="pricing-label">Starter</span>
+      <div class="pricing-name">Digital Menu</div>
+      <div class="pricing-amount">$99<span> /one-time</span></div>
+      <p class="pricing-desc">Perfect for restaurants and shops that need a clean digital presence fast.</p>
+      <ul class="pricing-features">
+        <li>Online digital menu</li>
+        <li>QR code for tables or windows</li>
+        <li>Mobile-optimized design</li>
+        <li>Easy to update via WhatsApp</li>
+      </ul>
+      <a href="https://wa.me/16475339529" class="pricing-btn outline" target="_blank">Get Started</a>
+    </div>
+    <div class="pricing-card featured reveal reveal-delay-2">
+      <span class="pricing-label">Most Popular</span>
+      <div class="pricing-name">Full Package</div>
+      <div class="pricing-amount">$349<span> /one-time</span></div>
+      <p class="pricing-desc">Everything you need to look professional and get found online.</p>
+      <ul class="pricing-features">
+        <li>Full website (up to 5 pages)</li>
+        <li>Digital menu + QR code</li>
+        <li>WhatsApp Business setup</li>
+        <li>Instagram + Facebook page</li>
+        <li>Basic graphics &amp; logo</li>
+        <li>Mobile-friendly &amp; fast</li>
+      </ul>
+      <a href="https://wa.me/16475339529" class="pricing-btn solid" target="_blank">Get a Free Sample</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-info reveal">
+      <span class="section-tag">Get In Touch</span>
+      <h2>Let's Get Your Business Online</h2>
+      <p>Send a message or WhatsApp me directly — I'll reply fast and get you a free sample within 24 hours.</p>
+      <div class="contact-items">
+        <a href="https://wa.me/16475339529" class="contact-item" target="_blank">
+          <div class="ci-icon">📱</div>
+          <div>
+            <div class="ci-sub">WhatsApp / Phone</div>
+            <div class="ci-label">647-533-9529</div>
+          </div>
+        </a>
+        <a href="mailto:idirstughluk@gmail.com" class="contact-item">
+          <div class="ci-icon">✉️</div>
+          <div>
+            <div class="ci-sub">Email</div>
+            <div class="ci-label">idirstughluk@gmail.com</div>
+          </div>
+        </a>
+        <div class="contact-item">
+          <div class="ci-icon">📍</div>
+          <div>
+            <div class="ci-sub">Location</div>
+            <div class="ci-label">Scarborough, Toronto, ON</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form reveal reveal-delay-2">
+      <div class="form-row">
+        <div class="form-group">
+          <label>YOUR NAME</label>
+          <input type="text" placeholder="e.g. John Smith">
+        </div>
+        <div class="form-group">
+          <label>PHONE / WHATSAPP</label>
+          <input type="tel" placeholder="e.g. 416-555-0100">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>BUSINESS TYPE</label>
+        <select>
+          <option value="">Select your business type...</option>
+          <option>Restaurant / Café</option>
+          <option>Retail Shop</option>
+          <option>Service Business</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>WHAT DO YOU NEED?</label>
+        <textarea placeholder="Tell me a bit about your business and what you're looking for..."></textarea>
+      </div>
+      <button class="form-submit" onclick="window.open('https://wa.me/16475339529','_blank')">Send Message via WhatsApp →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <a href="#" class="logo">Tughluk<span style="color:var(--accent)">.</span></a>
+    <p>Helping local businesses look professional online.</p>
+  </div>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+    <a href="https://wa.me/16475339529" target="_blank">WhatsApp</a>
+  </div>
+  <div class="footer-right">© 2026 Tughluk Digital</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx+'px'; cursor.style.top = my+'px'; });
+function animRing() { rx += (mx-rx)*0.1; ry += (my-ry)*0.1; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); }
+animRing();
+document.querySelectorAll('a,button').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; ring.style.width='54px'; ring.style.height='54px'; });
+  el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; ring.style.width='38px'; ring.style.height='38px'; });
+});
+
+// Sticky nav
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 50); });
+
+// Particle canvas
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.r = Math.random()*1.8+0.3;
+    this.vx = (Math.random()-0.5)*0.3; this.vy = (Math.random()-0.5)*0.3;
+    this.alpha = Math.random()*0.5+0.1;
+    this.color = Math.random()>0.7 ? '#00e5b0' : '#4a6fa5';
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if(this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.globalAlpha = this.alpha;
+    ctx.fill();
+  }
+}
+for(let i=0;i<120;i++) particles.push(new Particle());
+function drawLines() {
+  for(let i=0;i<particles.length;i++) {
+    for(let j=i+1;j<particles.length;j++) {
+      const d = Math.hypot(particles[i].x-particles[j].x, particles[i].y-particles[j].y);
+      if(d<120) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle = '#00e5b0';
+        ctx.globalAlpha = (1-d/120)*0.06;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+function animate() {
+  ctx.clearRect(0,0,W,H);
+  ctx.globalAlpha = 1;
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawLines();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
